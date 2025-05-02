@@ -72,8 +72,11 @@ static strulog_t s_strulog;
 static strulog_t ptr(char *key, void *val);
 static strulog_t string(char *key, char *val);
 static strulog_t strsize(char *key, char *val, int32_t vsize);
+static strulog_t hex(char *key, void *val, int32_t vsize);
+static strulog_t int16(char *key, int16_t val);
 static strulog_t int32(char *key, int32_t val);
 static strulog_t int64(char *key, int64_t val);
+static strulog_t uint16(char *key, uint16_t val);
 static strulog_t uint32(char *key, uint32_t val);
 static strulog_t uint64(char *key, uint64_t val);
 static void post(char *msg);
@@ -86,8 +89,11 @@ int32_t logger_init(enum e_logger_level_t level, int32_t logsize, int32_t logcnt
 
     s_strulog.string = string;
     s_strulog.strsize = strsize;
+    s_strulog.hex = hex;
+    s_strulog.int16 = int16;
     s_strulog.int32 = int32;
     s_strulog.int64 = int64;
+    s_strulog.uint16 = uint16;
     s_strulog.uint32 = uint32;
     s_strulog.uint64 = uint64;
     s_strulog.post = post;
@@ -271,10 +277,26 @@ static strulog_t strsize(char *key, char *val, int32_t vsize) {
     }
     return s_strulog;
 }
-//static strulog_t int16(char *key, int16_t val) {
-//    if(bsize > 0) bsize += snprintf(buf + bsize, sizeof(buf) - bsize, ",%s=%"PRId16, key, val);
-//    return s_strulog;
-//}
+static strulog_t hex(char *key, void *val, int32_t vsize) {
+    if(bsize <= 0) { return s_strulog; }
+    if(vsize <= 0) {
+        bsize += snprintf(buf + bsize, sizeof(buf) - bsize, ",%s=nil", key);
+        return s_strulog;
+    }
+    int32_t i;
+    uint8_t *uv = (uint8_t *)val;
+    bsize += snprintf(buf + bsize, sizeof(buf) - bsize, ",%s=0x%02x", key, uv[0]);
+    for(i=1; i < vsize; ++i) {
+        bsize += snprintf(buf + bsize, sizeof(buf) - bsize, ",%02x", uv[i]);
+    }
+    return s_strulog;
+}
+static strulog_t int16(char *key, int16_t val) {
+    if(bsize > 0) {
+	bsize += snprintf(buf + bsize, sizeof(buf) - bsize, ",%s=%"PRId16, key, val);
+    }
+    return s_strulog;
+}
 static strulog_t int32(char *key, int32_t val) {
     if(bsize > 0) {
         bsize += snprintf(buf + bsize, sizeof(buf) - bsize, ",%s=%"PRId32, key, val);
@@ -287,10 +309,10 @@ static strulog_t int64(char *key, int64_t val) {
     }
     return s_strulog;
 }
-//static strulog_t uint16(char *key, uint16_t val) {
-//    if(bsize > 0) bsize += snprintf(buf + bsize, sizeof(buf) - bsize, ",%s=%"PRIu16, key, val);
-//    return s_strulog;
-//}
+static strulog_t uint16(char *key, uint16_t val) {
+    if(bsize > 0) bsize += snprintf(buf + bsize, sizeof(buf) - bsize, ",%s=%"PRIu16, key, val);
+    return s_strulog;
+}
 static strulog_t uint32(char *key, uint32_t val) {
     if(bsize > 0) {
         bsize += snprintf(buf + bsize, sizeof(buf) - bsize, ",%s=%"PRIu32, key, val);
@@ -309,7 +331,7 @@ static strulog_t uint64(char *key, uint64_t val) {
 //}
 static void post(char *msg) {
     if(bsize > 0) {
-        bsize += snprintf(buf + bsize, sizeof(buf) - bsize, ",msg=%s\n", msg);
+        bsize += snprintf(buf + bsize, sizeof(buf) - bsize, ",msg=%s\n", msg ? msg : ".");
         do_logger_print(buf, bsize);
     }
 }

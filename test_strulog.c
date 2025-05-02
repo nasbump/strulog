@@ -24,8 +24,8 @@ int32_t main(int32_t argc, char *argv[]) {
     uint32_t uv32 = 20;
     uint64_t uv64 = 200;
 
-    //logger_init(LOGGER_TRACE, 1<<20, 1, NULL);
-    logger_init(LOGGER_TRACE, 1<<20, 1, "/dev/null");
+    logger_init(LOGGER_TRACE, 1<<20, 1, NULL);
+    //logger_init(LOGGER_TRACE, 1<<20, 1, "/dev/null");
 
     tot = (int32_t)atoi(argv[1]);
     if(argc == 2) {
@@ -44,6 +44,8 @@ int32_t main(int32_t argc, char *argv[]) {
                 post(body);
         }
     }
+
+    slogw.hex("hex", str, 6).post(NULL);
     return 0;
 }
 

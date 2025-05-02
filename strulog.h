@@ -29,8 +29,11 @@ typedef struct s_strulog_t {
     struct s_strulog_t (*ptr)(char *, void *);
     struct s_strulog_t (*string)(char *, char *);
     struct s_strulog_t (*strsize)(char *, char *, int32_t);
+    struct s_strulog_t (*hex)(char *, void *, int32_t);
+    struct s_strulog_t (*int16)(char *, int16_t);
     struct s_strulog_t (*int32)(char *, int32_t);
     struct s_strulog_t (*int64)(char *, int64_t);
+    struct s_strulog_t (*uint16)(char *, uint16_t);
     struct s_strulog_t (*uint32)(char *, uint32_t);
     struct s_strulog_t (*uint64)(char *, uint64_t);
     void (*post)(char *);
